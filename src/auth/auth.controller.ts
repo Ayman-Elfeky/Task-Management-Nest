@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -7,6 +7,12 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) { }
+
+    @Get('status')
+    @HttpCode(200)
+    async status() {
+        return { status: 'ok' };
+    }
 
     @Post('register')
     @HttpCode(201)
