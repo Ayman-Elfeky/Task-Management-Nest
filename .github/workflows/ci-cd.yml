@@ -1,0 +1,61 @@
+name: CI + CD Workflow
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+
+  # -----------------------------
+  # CI Job: Build and push Docker image
+  # -----------------------------
+  ci:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tasks-backend:latest
+
+  # -----------------------------
+  # CD Job: Deploy to EC2
+  # -----------------------------
+  cd:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: ci  # <-- ensures this job runs only after CI succeeds
+
+    steps:
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.1
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: Pull latest image and restart backend on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            cd ~/tasks-app
+            echo "Pulling latest backend Docker image..."
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/tasks-backend:latest
+
+            echo "Restarting backend container..."
+            docker-compose up -d --no-deps backend
+
+            echo "Cleaning up old Docker images..."
+            docker system prune -f
+          EOF
