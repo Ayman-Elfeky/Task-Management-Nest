@@ -14,12 +14,6 @@ export class AuthController {
         return { status: 'ok' };
     }
 
-    @Get('tryy')
-    @HttpCode(200)
-    async try() {
-        return { message: 'try endpoint working' };
-    }
-
     @Post('register')
     @HttpCode(201)
     async register(@Body() dto: RegisterDto) {
