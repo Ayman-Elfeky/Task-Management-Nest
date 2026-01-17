@@ -41,10 +41,11 @@ jobs:
     needs: ci  # <-- ensures this job runs only after CI succeeds
 
     steps:
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.8
-        with:
-          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
 
       - name: Pull latest image and restart backend on EC2
         run: |
