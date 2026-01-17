@@ -52,12 +52,6 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
           cd ~/tasks-app
 
-          echo "Pulling latest backend image..."
-          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/tasks-backend:latest
-
-          echo "Recreating backend container..."
-          docker-compose up -d --no-deps --force-recreate backend
-
-          echo "Cleanup..."
-          docker image prune -f
+          echo "Build Docker..."
+          docker compose up -d
           EOF
