@@ -2,9 +2,9 @@ name: CI + CD Workflow
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 jobs:
 
@@ -38,7 +38,7 @@ jobs:
   cd:
     name: Deploy to EC2
     runs-on: ubuntu-latest
-    needs: ci  # <-- ensures this job runs only after CI succeeds
+    needs: ci   # 👈 ensures CI runs before CD
 
     steps:
       - name: Setup SSH key
@@ -47,16 +47,17 @@ jobs:
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Pull latest image and restart backend on EC2
+      - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            cd ~/tasks-app
-            echo "Pulling latest backend Docker image..."
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/tasks-backend:latest
+          cd ~/tasks-app
 
-            echo "Restarting backend container..."
-            docker-compose up -d --no-deps backend
+          echo "Pulling latest backend image..."
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/tasks-backend:latest
 
-            echo "Cleaning up old Docker images..."
-            docker system prune -f
+          echo "Recreating backend container..."
+          docker-compose up -d --no-deps --force-recreate backend
+
+          echo "Cleanup..."
+          docker image prune -f
           EOF
