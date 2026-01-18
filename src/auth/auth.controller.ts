@@ -16,7 +16,7 @@ export class AuthController {
 
 @Get('try')
     @HttpCode(200)
-    async status() {
+    async try() {
         return { status: 'ok, working' };
     }
 
