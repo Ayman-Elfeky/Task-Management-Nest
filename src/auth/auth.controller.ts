@@ -14,6 +14,12 @@ export class AuthController {
         return { status: 'ok' };
     }
 
+@Get('try')
+    @HttpCode(200)
+    async status() {
+        return { status: 'ok, working' };
+    }
+
     @Post('register')
     @HttpCode(201)
     async register(@Body() dto: RegisterDto) {
