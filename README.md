@@ -194,6 +194,7 @@ curl -X POST http://localhost:3000/tasks \
 ```bash
 curl -X GET http://localhost:3000/tasks \
   -H "Authorization: Bearer <your-jwt-token>"
+
 ```
 
 ## 🗄️ Database Schema
